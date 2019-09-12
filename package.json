@@ -1,0 +1,36 @@
+{
+  "name": "antique-server",
+  "version": "1.0.0",
+  "description": "This is an e-commerce application that deals with furniture, interior decoration and building materials.",
+  "main": "index.js",
+  "scripts": {
+    "start-dev": "nodemon ./src/app.js --exec babel-node",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Sojisoyoye/antique-server.git"
+  },
+  "author": "Soji Soyoye",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Sojisoyoye/antique-server/issues"
+  },
+  "homepage": "https://github.com/Sojisoyoye/antique-server#readme",
+  "dependencies": {
+    "@babel/cli": "^7.6.0",
+    "@babel/core": "^7.6.0",
+    "@babel/node": "^7.6.1",
+    "@babel/preset-env": "^7.6.0",
+    "body-parser": "^1.19.0",
+    "dotenv": "^8.1.0",
+    "express": "^4.17.1",
+    "nodemon": "^1.19.2",
+    "pg": "^7.12.1",
+    "pg-hstore": "^2.3.3",
+    "sequelize": "^5.18.4",
+    "sequelize-cli": "^5.5.1",
+    "uuid": "^3.3.3",
+    "validatorjs": "^3.17.1"
+  }
+}
