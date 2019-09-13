@@ -4,21 +4,34 @@ module.exports = {
     return queryInterface.createTable('Users', {
       id: {
         allowNull: false,
-        autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.UUID,
+        defaultValue: Sequelize.UUIDV4
       },
       firstName: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        allowNull: false
       },
       lastName: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        allowNull: false
       },
       email: {
+        type: Sequelize.STRING,
+        unique: true,
+        allowNull: false
+      },
+      phoneNumber: {
         type: Sequelize.STRING
       },
       password: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        allowNull: false
+      },
+      role: {
+        type: Sequelize.STRING,
+        isIn: [['user', 'admin']],
+        defaultValue: 'user',
       },
       createdAt: {
         allowNull: false,
