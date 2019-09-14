@@ -1,49 +1,69 @@
-import uuidv4 from 'uuid/v4';
+import { combineResolvers } from 'graphql-resolvers';
+import { isAuthenticated, isPermitted } from './authorization';
 
 export default {
     Query: {
-        messages: (parent, args, { models }) => {
-            return Object.values(models.messages);
+        messages: async (parent, args, { models }) => {
+            return await models.Message.findAll();
         },
-        message: (parent, { id }, { models }) => {
-            return models.messages[id];
+
+        message: async (parent, { id }, { models }) => {
+            return await models.Message.findByPk(id);
         },
     },
 
     Mutation: {
-        createMessage: (parent, { text }, { me, models }) => {
-            const id = uuidv4();
-            const message = {
-                id,
-                text,
-                userId: me.id,
-            };
-            models.messages[id] = message;
-            models.users[me.id].messageIds.push(id);
-            return message;
-        },
-
-        updateMessage: (parent, { id, text }, { models }) => {
-            let { [id]: message } = models.messages;
-
-            message = { ...message, text }
-            
-            return message;
-        },
-      
-        deleteMessage: (parent, { id }, { models }) => {
-            const { [id]: message, ...otherMessages } = models.messages;
-            if (!message) {
-                return false;
+        createMessage: combineResolvers(
+            isAuthenticated,
+            async (parent, { text }, { signedInCustomer, models }) => {
+                try {
+                    const message = await models.Message.create({
+                        text,
+                        CustomerId: signedInCustomer.id,
+                    });
+                    
+                    return message;
+                    
+                } catch (error) {
+                    throw new Error(error);
+                };
             }
-            models.messages = otherMessages;
-            return true;
-        },
+        ),
+
+        updateMessage: combineResolvers(
+            isAuthenticated,
+            isPermitted,
+            async (parent, { id, text }, { models }) => {
+                try {
+                    const message = await models.Message.findByPk(id)
+                    const updatedMsg = await message.update({
+                        text
+                    })
+                    
+                    return updatedMsg;
+                    
+                } catch (error) {
+                    throw new Error(error);
+                }
+            }
+        ),
+      
+        deleteMessage: combineResolvers(
+            isAuthenticated,
+            isPermitted,
+            async (parent, { id }, { models }) => {
+                try {
+                    return await models.Message.destroy({ where: { id } });
+                } catch (error) {
+                    throw new Error(error);
+                }
+            }
+        ),
     },
     
     Message: {
-        user: (message, args, { models }) => {
-            return models.users[message.userId];
+        customer: async (message, args, { models }) => {
+            return await models.Customer.findByPk(message.CustomerId);
         },
     },
 };

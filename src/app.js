@@ -7,7 +7,8 @@ import bodyParser from 'body-parser';
 
 import schema from './graphql/schema';
 import resolvers from './graphql/resolvers';
-import models from './models/db';
+import models from './models';
+import { checkSignIn } from './graphql/middleware';
 
 
 env.config();
@@ -22,11 +23,26 @@ app.use(bodyParser.urlencoded({ extended: false }));
 const server = new ApolloServer({
     typeDefs: schema,
     resolvers,
-    context: {
-        models,
-        me: models.users[1],
+    formatError: error => {
+        const message = error.message
+            .replace('SequelizeValidationError: ', '')
+            .replace('Validation error: ', '');
+        
+        return {
+            ...error,
+            message,
+        }
     },
-})
+    context: async ({ req }) => {
+
+        const signedInCustomer = await checkSignIn(req);
+
+        return {
+            models,
+            signedInCustomer,
+        }
+    },
+});
 
 server.applyMiddleware({ app, path: '/graphql' });
 
@@ -38,9 +54,45 @@ app.all('*', (req, res) => res.status(404).send({
     status: 'error',
     message: 'This route does not exist'
 }));
-  
+
+models.sequelize.authenticate();
+models.sequelize.sync({ force: false })
+//     .then(async () => {
+//     createUsersWithMessages(); 
+// })
+
 app.listen({ port: 3000 }, () => {
     console.log('Apollo Server on http://localhost:3000/graphql');
-})
+});
 
-
+// const createUsersWithMessages = async () => {
+//     await models.Customer.create(
+//         {
+//             username: 'Omoba',
+//             messages: [
+//                 {
+//                     text: 'Published the Road to learn React',
+//                 },
+//             ],
+//         },
+//         {
+//             include: [models.Message],
+//         },
+//     );
+//     await models.Customer.create(
+//         {
+//             username: 'Aji',
+//             messages: [
+//                 {
+//                     text: 'Happy to release ...',
+//                 },
+//                 {
+//                     text: 'Published a complete ...',
+//                 },
+//             ],
+//         },
+//         {
+//             include: [models.Message],
+//         },
+//     );
+// }
