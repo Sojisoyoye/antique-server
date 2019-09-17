@@ -15,6 +15,6 @@ export default gql`
   type Message {
     id: ID!
     text: String!
-    user: User!
+    customer: User!
   }
 `;

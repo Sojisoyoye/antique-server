@@ -1,4 +1,4 @@
-import { hashPassword } from '../helpers/password';
+import { hashPassword } from '../helpers';
 
 const user = (sequelize, DataTypes) => {
   const User = sequelize.define('User', {
@@ -52,13 +52,14 @@ const user = (sequelize, DataTypes) => {
     },
   }, {});
 
-  User.beforecreate(async (newUser) => {
+  User.beforeCreate(async (newUser) => {
     newUser.password = hashPassword(newUser.password);
   });
 
   User.associate = function(models) {
     // associations can be defined here
   };
+
   return User;
 };
 
